@@ -115,12 +115,64 @@ export async function getSellerServices(
   return error ? [] : data ?? [];
 }
 
+export async function getSellerStoreById(
+  userId: string,
+  id: number,
+): Promise<StoreRow | null> {
+  const stores = await getSellerStores(userId);
+  return stores.find((store) => store.id === id) ?? null;
+}
+
+export async function getSellerProductById(
+  userId: string,
+  id: number,
+): Promise<ProductRow | null> {
+  const stores = await getSellerStores(userId);
+  if (stores.length === 0) return null;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("test_products")
+    .select("*")
+    .eq("id", id)
+    .in("store_id", stores.map((store) => store.id))
+    .maybeSingle();
+
+  return data ?? null;
+}
+
+export async function getSellerServiceById(
+  userId: string,
+  id: number,
+): Promise<ServiceRow | null> {
+  const stores = await getSellerStores(userId);
+  if (stores.length === 0) return null;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("test_services")
+    .select("*")
+    .eq("id", id)
+    .in("store_id", stores.map((store) => store.id))
+    .maybeSingle();
+
+  return data ?? null;
+}
+
 export function firstImage(value: Json | null): string | null {
   if (Array.isArray(value)) {
     return value.find((item): item is string => typeof item === "string") ?? null;
   }
   if (typeof value === "string") return value;
   return null;
+}
+
+/** Form-friendly representation of a JSON string/array column. */
+export function jsonList(value: Json | null): string {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string").join(", ");
+  }
+  return typeof value === "string" ? value : "";
 }
 
 export function productPrice(value: ProductRow["price"]): number {

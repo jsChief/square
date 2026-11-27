@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Package, Plus } from "lucide-react";
+import { Package, Pencil, Plus } from "lucide-react";
+import { DeleteButton } from "@/components/dashboard/delete-button";
 import { requireUser } from "@/lib/auth/session";
 import { mapCategory } from "@/lib/data";
 import {
@@ -16,6 +17,7 @@ import {
   FilterPills,
   ListingStatusBadge,
   PageHeader,
+  SavedNotice,
   formatDate,
 } from "@/components/dashboard/ui";
 import { categoryLabels, formatPrice } from "@/lib/utils";
@@ -50,9 +52,9 @@ function matches(product: ProductRow, view: View): boolean {
 export default async function ListingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; saved?: string }>;
 }) {
-  const { view: viewParam } = await searchParams;
+  const { view: viewParam, saved } = await searchParams;
   const user = await requireUser("/dashboard/listings");
   const stores = await getSellerStores(user.id);
   const products = await getSellerProducts(stores.map((store) => store.id));
@@ -70,7 +72,7 @@ export default async function ListingsPage({
         description="Everything you've listed, live or in review."
         actions={
           <Link
-            href="/sell"
+            href="/dashboard/listings/new"
             className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent/90"
           >
             <Plus className="size-4" aria-hidden="true" />
@@ -79,18 +81,24 @@ export default async function ListingsPage({
         }
       />
 
+      <SavedNotice saved={saved} />
+
       {stores.length === 0 || products.length === 0 ? (
         <div className="mt-6">
           <EmptyState
             icon={Package}
             title="No listings yet"
-            message="Publish your first item and it will show up here with its review status."
+            message={
+              stores.length === 0
+                ? "Create a store first, then publish your first item. It will show up here with its review status."
+                : "Publish your first item and it will show up here with its review status."
+            }
             action={
               <Link
-                href="/sell"
+                href={stores.length === 0 ? "/dashboard/stores/new" : "/dashboard/listings/new"}
                 className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent/90"
               >
-                List something
+                {stores.length === 0 ? "Create a store" : "List something"}
               </Link>
             }
           />
@@ -180,9 +188,26 @@ export default async function ListingsPage({
                       )}
                     </div>
 
-                    <p className="ml-auto text-sm font-semibold tabular-nums">
-                      {formatPrice(productPrice(product.price))}
-                    </p>
+                    <div className="ml-auto flex items-center gap-3">
+                      <p className="text-sm font-semibold tabular-nums">
+                        {formatPrice(productPrice(product.price))}
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/dashboard/listings/${product.id}/edit`}
+                          aria-label={`Edit ${product.name?.trim() || "listing"}`}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+                        >
+                          <Pencil className="size-3.5" aria-hidden="true" />
+                          Edit
+                        </Link>
+                        <DeleteButton
+                          kind="listing"
+                          id={product.id}
+                          label={product.name?.trim() || "listing"}
+                        />
+                      </div>
+                    </div>
                   </div>
                 );
               })}

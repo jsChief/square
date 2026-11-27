@@ -44,6 +44,7 @@ export default async function RootLayout({
         <Script src="/theme-init.js" strategy="beforeInteractive" />
         <ThemeProvider>
           <SiteChrome
+            signedIn={signedIn}
             header={<SiteHeader viewer={{ signedIn, id: userId, hasListings, name, avatarUrl }} />}
             footer={<SiteFooter />}
           >

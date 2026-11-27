@@ -1,7 +1,29 @@
 import Link from "next/link";
-import { Star, type LucideIcon } from "lucide-react";
+import { CircleCheck, Star, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProductRow } from "@/lib/seller/queries";
+
+export function SavedNotice({ saved }: { saved?: string }) {
+  if (!saved) return null;
+
+  const messages: Record<string, string> = {
+    created: "Created successfully.",
+    updated: "Changes saved.",
+    deleted: "Deleted successfully.",
+  };
+  const message = messages[saved];
+  if (!message) return null;
+
+  return (
+    <p
+      role="status"
+      className="mt-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent-soft px-3.5 py-2 text-xs font-medium text-accent"
+    >
+      <CircleCheck className="size-3.5" aria-hidden="true" />
+      {message}
+    </p>
+  );
+}
 
 export function formatDate(value: string | null) {
   if (!value) return "";

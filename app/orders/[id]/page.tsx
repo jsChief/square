@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CircleCheck, CreditCard, Mail } from "lucide-react";
-import { signOut } from "@/lib/auth-actions";
 import { requireUser } from "@/lib/auth/session";
 import {
   getOrderById,
@@ -15,6 +14,7 @@ import {
   getPaystackPublicKey,
 } from "@/lib/payments/paystack";
 import { formatPrice } from "@/lib/utils";
+import { RefreshButton } from "@/components/dashboard/refresh-button";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { PayOrderButton } from "@/components/orders/pay-order-button";
@@ -75,6 +75,7 @@ export default async function OrderPage({
   const buying = order.buyer_id === user.id;
   const selling = order.seller_id === user.id;
   if (!buying && !selling) notFound();
+  const backHref = selling ? "/dashboard/orders" : "/orders";
 
   const receipts = await getOrderReceipts(orderId);
   const counterpartyId = buying ? order.seller_id : order.buyer_id;
@@ -100,20 +101,13 @@ export default async function OrderPage({
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
-          href="/orders"
+          href={backHref}
           className="inline-flex items-center gap-2 rounded-md py-2 text-sm text-muted transition-colors hover:text-accent"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           All orders
         </Link>
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="rounded-full border border-line px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent"
-          >
-            Sign out
-          </button>
-        </form>
+        <RefreshButton />
       </div>
 
       {(showPlacedSuccess || showPaidSuccess) && (

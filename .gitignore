@@ -28,3 +28,6 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# design review artifacts
+/.impeccable/

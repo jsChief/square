@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ExternalLink, MapPin, MessageCircle, Phone, Store } from "lucide-react";
+import Link from "next/link";
+import {
+  ExternalLink,
+  MapPin,
+  MessageCircle,
+  Pencil,
+  Phone,
+  Plus,
+  Store,
+} from "lucide-react";
+import { DeleteButton } from "@/components/dashboard/delete-button";
 import { requireUser } from "@/lib/auth/session";
 import {
   getSellerProducts,
@@ -9,7 +19,12 @@ import {
   getStoreReviews,
   isListingLive,
 } from "@/lib/seller/queries";
-import { EmptyState, PageHeader, formatDate } from "@/components/dashboard/ui";
+import {
+  EmptyState,
+  PageHeader,
+  SavedNotice,
+  formatDate,
+} from "@/components/dashboard/ui";
 
 export const metadata: Metadata = {
   title: "Your stores — square",
@@ -18,7 +33,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function StoresPage() {
+export default async function StoresPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
+  const { saved } = await searchParams;
   const user = await requireUser("/dashboard/stores");
   const stores = await getSellerStores(user.id);
   const storeIds = stores.map((store) => store.id);
@@ -33,14 +53,33 @@ export default async function StoresPage() {
       <PageHeader
         title="Stores"
         description="The storefronts behind your listings and services."
+        actions={
+          <Link
+            href="/dashboard/stores/new"
+            className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent/90"
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            New store
+          </Link>
+        }
       />
+
+      <SavedNotice saved={saved} />
 
       {stores.length === 0 ? (
         <div className="mt-6">
           <EmptyState
             icon={Store}
             title="No store yet"
-            message="Your store is created alongside your first listing. Once it exists, its details and stats appear here."
+            message="Create a storefront to hold your listings and services. Its details and stats will appear here."
+            action={
+              <Link
+                href="/dashboard/stores/new"
+                className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent/90"
+              >
+                Create a store
+              </Link>
+            }
           />
         </div>
       ) : (
@@ -148,7 +187,22 @@ export default async function StoresPage() {
                       Visit link
                     </a>
                   )}
-                  <span className="ml-auto text-muted">
+                  <div className="ml-auto flex items-center gap-1.5">
+                    <Link
+                      href={`/dashboard/stores/${store.id}/edit`}
+                      aria-label={`Edit ${store.name}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+                    >
+                      <Pencil className="size-3.5" aria-hidden="true" />
+                      Edit
+                    </Link>
+                    <DeleteButton
+                      kind="store"
+                      id={store.id}
+                      label={store.name ?? "store"}
+                    />
+                  </div>
+                  <span className="text-muted">
                     Joined {formatDate(store.created_at)}
                   </span>
                 </div>

@@ -36,16 +36,10 @@ export function DashboardNav({
   userId,
   userName,
   userAvatarUrl,
-  storeName,
-  storeLocation,
-  storeCount,
 }: {
   userId: string;
   userName: string;
   userAvatarUrl: string | null;
-  storeName: string | null;
-  storeLocation: string | null;
-  storeCount: number;
 }) {
   const pathname = usePathname();
 
@@ -71,22 +65,6 @@ export function DashboardNav({
             <p className="mt-0.5 text-xs text-muted">Seller account</p>
           </div>
         </div>
-
-        {(storeName || storeCount > 0) && (
-          <div className="mb-6 rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center gap-2">
-              <Store className="size-4 shrink-0 text-accent" aria-hidden="true" />
-              <p className="truncate text-sm font-semibold">
-                {storeName ?? "Your store"}
-              </p>
-            </div>
-            <p className="mt-1 truncate text-xs text-muted">
-              {storeCount > 1
-                ? `${storeCount} stores`
-                : (storeLocation ?? "Near campus")}
-            </p>
-          </div>
-        )}
 
         <nav aria-label="Dashboard" className="space-y-1">
           {navItems.map((item) => {

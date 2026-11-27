@@ -27,13 +27,13 @@ export async function getOrderReceipts(orderId: number): Promise<ReceiptRow[]> {
   return error ? [] : data ?? [];
 }
 
-/** RLS already limits these to orders the user participates in. */
-export async function getOrdersForUser(userId: string): Promise<OrderRow[]> {
+/** Orders bought by this user. Sales live in the seller dashboard. */
+export async function getBuyerOrders(userId: string): Promise<OrderRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
     .select("*")
-    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+    .eq("buyer_id", userId)
     .order("created_at", { ascending: false });
 
   return error ? [] : data ?? [];

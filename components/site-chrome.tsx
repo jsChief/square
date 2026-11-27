@@ -22,10 +22,12 @@ const authRoutes = [
 export function SiteChrome({
   header,
   footer,
+  signedIn,
   children,
 }: {
   header: ReactNode;
   footer: ReactNode;
+  signedIn: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
@@ -46,7 +48,7 @@ export function SiteChrome({
         {children}
       </main>
       {!isAuth && footer}
-      {!isAuth && <BottomNav />}
+      {!isAuth && <BottomNav signedIn={signedIn} />}
     </div>
   );
 }

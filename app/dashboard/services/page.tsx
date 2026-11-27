@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { MessageCircle, Sparkles, Wrench } from "lucide-react";
+import Link from "next/link";
+import { MessageCircle, Pencil, Plus, Sparkles, Wrench } from "lucide-react";
+import { DeleteButton } from "@/components/dashboard/delete-button";
 import { requireUser } from "@/lib/auth/session";
 import {
   firstImage,
@@ -10,6 +12,7 @@ import {
 import {
   EmptyState,
   PageHeader,
+  SavedNotice,
   ServiceStatusBadge,
   formatDate,
 } from "@/components/dashboard/ui";
@@ -21,7 +24,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function ServicesPage() {
+export default async function ServicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
+  const { saved } = await searchParams;
   const user = await requireUser("/dashboard/services");
   const stores = await getSellerStores(user.id);
   const services = await getSellerServices(stores.map((store) => store.id));
@@ -32,14 +40,43 @@ export default async function ServicesPage() {
       <PageHeader
         title="Services"
         description="What your stores offer beyond products."
+        actions={
+          <Link
+            href={
+              stores.length === 0 ? "/dashboard/stores/new" : "/dashboard/services/new"
+            }
+            className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent/90"
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            New service
+          </Link>
+        }
       />
+
+      <SavedNotice saved={saved} />
 
       {services.length === 0 ? (
         <div className="mt-6">
           <EmptyState
             icon={Wrench}
             title="No services yet"
-            message="Services you offer — tutoring, repairs, and more — will appear here."
+            message={
+              stores.length === 0
+                ? "Create a store first, then add services like tutoring or repairs."
+                : "Add a tutoring, repair, or other service to get started."
+            }
+            action={
+              <Link
+                href={
+                  stores.length === 0
+                    ? "/dashboard/stores/new"
+                    : "/dashboard/services/new"
+                }
+                className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent/90"
+              >
+                {stores.length === 0 ? "Create a store" : "Add a service"}
+              </Link>
+            }
           />
         </div>
       ) : (
@@ -104,6 +141,21 @@ export default async function ServicesPage() {
                       Contact on WhatsApp
                     </a>
                   )}
+                  <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3">
+                    <Link
+                      href={`/dashboard/services/${service.id}/edit`}
+                      aria-label={`Edit ${service.name?.trim() || "service"}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-accent"
+                    >
+                      <Pencil className="size-3.5" aria-hidden="true" />
+                      Edit
+                    </Link>
+                    <DeleteButton
+                      kind="service"
+                      id={service.id}
+                      label={service.name?.trim() || "service"}
+                    />
+                  </div>
                 </div>
               </div>
             );

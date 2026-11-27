@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   LayoutDashboard,
-  Package,
   Plus,
+  Receipt,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -19,36 +19,51 @@ interface BottomNavItem {
   match?: (pathname: string) => boolean;
 }
 
-const items: BottomNavItem[] = [
-  { href: "/", label: "Home", icon: Home, match: (p) => p === "/" },
-  {
-    href: "/listings",
-    label: "Browse",
-    icon: Package,
-    match: (p) => p.startsWith("/listings"),
-  },
-  { href: "/sell", label: "Sell", icon: Plus, match: (p) => p.startsWith("/sell") },
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    match: (p) => p.startsWith("/dashboard"),
-  },
-  {
+export function BottomNav({ signedIn }: { signedIn: boolean }) {
+  const pathname = usePathname() ?? "";
+
+  const homeItem: BottomNavItem = {
+    href: signedIn ? "/listings" : "/",
+    label: "Home",
+    icon: Home,
+    match: signedIn ? (p) => p.startsWith("/listings") : (p) => p === "/",
+  };
+  const settingsItem: BottomNavItem = {
     href: "/settings",
     label: "Settings",
     icon: Settings,
     match: (p) => p.startsWith("/settings"),
-  },
-];
+  };
 
-export function BottomNav() {
-  const pathname = usePathname() ?? "";
+  const items: BottomNavItem[] = signedIn
+    ? [
+        homeItem,
+        {
+          href: "/orders",
+          label: "Orders",
+          icon: Receipt,
+          match: (p) => p === "/orders" || p.startsWith("/orders/"),
+        },
+        {
+          href: "/dashboard/listings/new",
+          label: "Sell",
+          icon: Plus,
+          match: (p) => p === "/dashboard/listings/new" || p === "/sell",
+        },
+        {
+          href: "/dashboard",
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          match: (p) => p.startsWith("/dashboard"),
+        },
+        settingsItem,
+      ]
+    : [homeItem, settingsItem];
 
   return (
     <nav
       aria-label="Primary"
-      className="fixed bottom-[calc(0.875rem+env(safe-area-inset-bottom))] left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 md:hidden"
+      className="fixed bottom-[calc(0.875rem+env(safe-area-inset-bottom))] left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 sm:max-w-md lg:max-w-lg"
     >
       <div className="flex items-stretch justify-between rounded-full border border-line bg-surface/90 px-2 py-1.5 shadow-lg shadow-black/10 backdrop-blur-xl">
         {items.map((item) => {

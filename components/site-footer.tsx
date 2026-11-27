@@ -5,7 +5,7 @@ import logo from "@/assets/squareIcon_1024_2x.png";
 export function SiteFooter() {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-28 pt-10 sm:flex-row sm:items-center sm:justify-between sm:px-6 md:pb-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-28 pt-10 sm:flex-row sm:items-center sm:justify-between sm:px-6 md:pb-24">
         <div>
           <div className="flex items-center font-semibold">
             <Image
